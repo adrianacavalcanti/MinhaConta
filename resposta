@@ -1,1 +1,160 @@
 
+1. Indique as tecnologias que você escolheria para esta solução e por qual motivo(considere um grande volume de acesso);   
+Big Data: porque se refere ao armazenamento de uma imensa quantidade de dados, bem como a capacidade de retirar valor dessas informações em velocidade rápida.
+ 
+2. Utilizando a tecnologia que escolheu para o desafio, demonstre utilizando trechos de código-fonte:    
+Foi utilizado Java 8, Spring MVC, Spring Boot, JPA, Hibernate, no front fiz apenas uma tela como exemplo de conhecimento utilizando bootstrap com HTML, banco de dados Mysql.
+ Informações cadastrais 
+View
+<form action="salvar" method="post">
+			<div class="form-group">
+				<label for="nome">Nome completo</label> <input type="text"
+					class="form-control" id="nome" name="nome" placeholder="Nome" />
+			</div>
+			<div class="form-group">
+				<label for="email">E-mail</label> <input type="email"
+					class="form-control" id="email" name="email" placeholder="Email" />
+			</div>
+			<div class="form-group">
+				<label for="telefone">Telefone</label> <input
+					type="text" class="form-control" id="telefone" name="telefone" placeholder="Telefone" />
+			</div>
+			<button type="submit" class="btn btn-success">Salvar</button>
+		</form>
+
+
+
+Informações sobre os pedidos em andamento
+Service
+
+@Override
+	public Pedido retornarPedidosAndamento(Long idPedido) {
+
+		Pedido pedido = repository.findOne(idPedido);
+
+		return pedido;
+	}
+
+
+
+
+Informações do histórico de pedidos (3 meses) 
+MODEL
+@Override
+	public Iterable<Pedido> listarHistoricoPedido(Date data, Cliente idCliente) {
+		List<Pedido> pedidos = manager.createQuery(
+				"select d from Pedido d " + "inner join fetch d.itensPedido " + "inner join fetch d.cliente "
+						+ "where d.dataPedido > :data and d.idCliente:idCliente " + "order by d.dataPedido desc",
+				Pedido.class).setParameter("data", data).setParameter("idCliente", idCliente).setMaxResults(20)
+				.getResultList();
+		return pedidos;
+	}
+
+Sugestões de produtos para que ele possa realizar novos pedidos
+CONTROLLER
+/*
+	 * Retorna uma lista de produtos
+	 */
+	public String listarProdutos(Model model) {
+
+		Iterable<Produto> produtos = produtoService.listarProdutos();
+
+		model.addAttribute("produtos", produtos);
+
+		return "listaprodutos";
+	}
+
+Spring boot
+@SpringBootApplication
+@ComponentScan("br.com.teste.minhaconta")
+public class Configuracao {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Configuracao.class, args);
+	}
+	
+}
+
+JPA
+@Entity(name = "cliente")
+public class Cliente implements Serializable{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Id
+	@GeneratedValue
+	@Column(name="ID_USUARIO", nullable = false)
+	private Long idUsuario;
+
+	@Column(name="NOME", nullable = false)
+	private String nome;
+	
+	@Column(name="EMAIL", nullable = false)
+	private String email;
+	
+	@Column(name="TELEFONE", nullable = false)
+	private String telefone;
+
+	public Cliente(String nome, String email, String telefone) {
+		super();
+		this.nome = nome;
+		this.email = email;
+		this.telefone = telefone;
+	}
+
+	public Long getIdUsuario() {
+		return idUsuario;
+	}
+
+	public void setIdUsuario(Long idUsuario) {
+		this.idUsuario = idUsuario;
+	}
+
+	public String getNome() {
+		return nome;
+	}
+
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getTelefone() {
+		return telefone;
+	}
+
+	public void setTelefone(String telefone) {
+		this.telefone = telefone;
+	}
+
+}
+
+
+a. Como dividiu as camadas da aplicação; 
+Foi utilizado o MVC para dividir a aplicação, ou seja, esta dividida nas seguintes camadas:
+View que é a camada front.
+Controller que recebe as informações da View.
+Service que recebe as informações do Controller.
+Repository(Repository) que recebe informações do Service acessa o banco através do hibernate e retorna os dados necessários.
+b. Considerando que existem APIs que retornam as informações necessárias                   citadas acima, comente como desenvolveu a camada de acesso às APIs para                         recuperar as informações;  
+Utilizei o JPA com hibernate mapeado dentro do sping boot, sendo que o repository é o responsável por orquestrar o acesso aos dados.
+
+c. Como garantiu a qualidade do código por cobertura de testes;    
+JUNIT
+
+3. Comente em poucas palavras o que entende sobre os conceitos abaixo:   
+a. SOLID : são princípios da programação a objetos como código fácil de manter e de ajustar, de fácil entendimento, fácil de alterar, reaproveitável, que seja utilizável por um longo período de tempo.
+•	b. Orientação a objetos : é uma forma de abstração de uma classe que da origem a um objeto, onde podemos utilizar ou não seus atributos e métodos e assim usar  a abstração, o encapsulamento, a herança e o polimorfismo para chegar a um objetivo.
+
+c. Agilidade :é possuir habilidade e criatividade para criar ou adaptar continuamente, formas de garantir a execução ágil de um produto ou serviço.
+d.Continuous Integration:é o ato de o desenvolvedor integra o código alterado e/ou desenvolvido ao projeto principal na mesma frequência com que as funcionalidades são desenvolvidas, sendo feito muitas vezes ao dia ao invés de apenas uma vez, através do commit.
